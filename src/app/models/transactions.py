@@ -1,5 +1,21 @@
 from app.extensions import db
+import enum
 from app.models.base import BaseModel
+
+# Enums
+class InvoiceStatus(enum.Enum):
+    draft     = 'draft'      # Being built, not yet issued to client
+    issued    = 'issued'     # Sent to client, awaiting payment
+    partial   = 'partial'    # Some payments received, not fully paid
+    paid      = 'paid'       # Fully paid
+    overdue   = 'overdue'    # Past due date with remaining balance
+    cancelled = 'cancelled'  # Voided
+ 
+class PaymentMethod(enum.Enum):
+    cash          = 'cash'
+    bank_transfer = 'bank_transfer'
+    cheque        = 'cheque'
+    other         = 'other'
 
 # Buy model
 class Buy(BaseModel):
@@ -22,7 +38,7 @@ class BuyItem(BaseModel):
 
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price_buy = db.Column(db.Numeric(10, 2), nullable=False)
 
 class Buycart(BaseModel):
     __tablename__ = 'buy_cart'
@@ -32,7 +48,7 @@ class Buycart(BaseModel):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price_buy = db.Column(db.Numeric(10, 2), nullable=False)
 
 # Delivery model
 class Delivery(BaseModel):
@@ -58,7 +74,6 @@ class DeliveryItem(BaseModel):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
 
 class Deliverycart(BaseModel):
     __tablename__ = 'delivery_cart'
@@ -68,7 +83,6 @@ class Deliverycart(BaseModel):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
 
 # Invoice model
 class Invoice(BaseModel):
@@ -83,8 +97,9 @@ class Invoice(BaseModel):
     po_number = db.Column(db.String(80), nullable=True)
     status = db.Column(db.String(20), nullable=False)
 
-    items = db.relationship('InvoiceItem', backref='invoice', lazy=True, cascade='all, delete-orphan')
-    client = db.relationship('Client', backref='invoices')
+    items    = db.relationship('InvoiceItem', backref='invoice', lazy=True, cascade='all, delete-orphan')
+    payments = db.relationship('Payment',     backref='invoice', lazy=True, cascade='all, delete-orphan')
+    client   = db.relationship('Client', backref='invoices')
 
 class InvoiceItem(BaseModel):
     __tablename__ = 'invoice_item'
@@ -95,7 +110,7 @@ class InvoiceItem(BaseModel):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price_sell = db.Column(db.Numeric(10, 2), nullable=False)
 
 class Invoicecart(BaseModel):
     __tablename__ = 'invoice_cart'
@@ -103,6 +118,24 @@ class Invoicecart(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    delivery_item_id = db.Column(db.Integer, db.ForeignKey('delivery_item.id'), nullable=True)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price_sell = db.Column(db.Numeric(10, 2), nullable=False)
+
+# Payment model
+class Payment(BaseModel):
+    __tablename__ = 'payment'
+ 
+    id         = db.Column(db.Integer, primary_key=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=False, index=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'),    nullable=False, index=True)
+ 
+    date      = db.Column(db.Date,                nullable=False)
+    amount    = db.Column(db.Numeric(12, 2),      nullable=False)
+    method    = db.Column(db.Enum(PaymentMethod), nullable=False)
+ 
+    reference = db.Column(db.String(120), nullable=True)
+    note      = db.Column(db.Text,        nullable=True)
+ 
+    user = db.relationship('User', backref='payments', lazy=True)

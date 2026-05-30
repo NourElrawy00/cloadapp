@@ -13,5 +13,4 @@ class Product(BaseModel):
     buy_items = db.relationship('BuyItem', backref='product', lazy=True)
     delivery_items = db.relationship('DeliveryItem', backref='product', lazy=True)
     invoice_items = db.relationship('InvoiceItem', backref='product', lazy=True)
-    offer_items = db.relationship('OfferItem', backref='product', lazy=True)
     warehouse_items = db.relationship('WarehouseItem', backref='product', lazy=True)

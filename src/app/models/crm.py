@@ -24,7 +24,7 @@ class ClientAgent(BaseModel):
     __tablename__ = 'client_agent'
 
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False, index=True)
     name = db.Column(db.String(80), nullable=False)
 
     phones = db.relationship('ClientAgentPhone', backref='client_agent', lazy=True, cascade='all, delete-orphan')
@@ -35,14 +35,14 @@ class ClientAgentPhone(BaseModel):
     __tablename__ = 'client_agent_phone'
 
     id = db.Column(db.Integer, primary_key=True)
-    client_agent_id = db.Column(db.Integer, db.ForeignKey('client_agent.id'), nullable=False)
+    client_agent_id = db.Column(db.Integer, db.ForeignKey('client_agent.id'), nullable=False, index=True)
     phone_number = db.Column(db.String(20), nullable=False)
 
 class ClientAgentEmail(BaseModel):
     __tablename__ = 'client_agent_email'
 
     id = db.Column(db.Integer, primary_key=True)
-    client_agent_id = db.Column(db.Integer, db.ForeignKey('client_agent.id'), nullable=False)
+    client_agent_id = db.Column(db.Integer, db.ForeignKey('client_agent.id'), nullable=False, index=True)
     email_address = db.Column(db.String(120), nullable=False)
 
 # Supplier model
@@ -68,7 +68,7 @@ class SupplierAgent(BaseModel):
     __tablename__ = 'supplier_agent'
 
     id = db.Column(db.Integer, primary_key=True)
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False, index=True)
     name = db.Column(db.String(80), nullable=False)
 
     phones = db.relationship('SupplierAgentPhone', backref='supplier_agent', lazy=True, cascade='all, delete-orphan')
@@ -79,12 +79,12 @@ class SupplierAgentPhone(BaseModel):
     __tablename__ = 'supplier_agent_phone'
 
     id = db.Column(db.Integer, primary_key=True)
-    supplier_agent_id = db.Column(db.Integer, db.ForeignKey('supplier_agent.id'), nullable=False)
+    supplier_agent_id = db.Column(db.Integer, db.ForeignKey('supplier_agent.id'), nullable=False, index=True)
     phone_number = db.Column(db.String(20), nullable=False)
 
 class SupplierAgentEmail(BaseModel):
     __tablename__ = 'supplier_agent_email'
 
     id = db.Column(db.Integer, primary_key=True)
-    supplier_agent_id = db.Column(db.Integer, db.ForeignKey('supplier_agent.id'), nullable=False)
+    supplier_agent_id = db.Column(db.Integer, db.ForeignKey('supplier_agent.id'), nullable=False, index=True)
     email_address = db.Column(db.String(120), nullable=False)
