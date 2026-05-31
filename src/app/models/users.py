@@ -33,11 +33,11 @@ class UserPhone(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    phone_number = db.Column(db.String(20), nullable=False)
+    number = db.Column(db.String(20), nullable=False)
 
 class UserEmail(BaseModel):
     __tablename__ = 'user_email'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    email_address = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False)

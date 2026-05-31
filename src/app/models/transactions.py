@@ -4,7 +4,6 @@ from app.models.base import BaseModel
 
 # Enums
 class InvoiceStatus(enum.Enum):
-    draft     = 'draft'      # Being built, not yet issued to client
     issued    = 'issued'     # Sent to client, awaiting payment
     partial   = 'partial'    # Some payments received, not fully paid
     paid      = 'paid'       # Fully paid
@@ -26,7 +25,7 @@ class Buy(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     date = db.Column(db.Date, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
+    reference = db.Column(db.String(80), nullable=False)
 
     items = db.relationship('BuyItem', backref='buy', lazy=True, cascade='all, delete-orphan')
 
@@ -59,7 +58,7 @@ class Delivery(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     date = db.Column(db.Date, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
+    reference = db.Column(db.String(80), nullable=False)
 
     items = db.relationship('DeliveryItem', backref='delivery', lazy=True, cascade='all, delete-orphan')
     client = db.relationship('Client', backref='deliveries')
@@ -81,6 +80,8 @@ class Deliverycart(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    buy_item_id = db.Column(db.Integer, db.ForeignKey('buy_item.id'), nullable=True)
+    warehouse_item_id = db.Column(db.Integer, db.ForeignKey('warehouse_item.id'), nullable=True)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
 
@@ -95,7 +96,7 @@ class Invoice(BaseModel):
     date = db.Column(db.Date, nullable=False)
     number = db.Column(db.String(80), nullable=False)
     po_number = db.Column(db.String(80), nullable=True)
-    status = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.Enum(InvoiceStatus), nullable=False, default=InvoiceStatus.issued)
 
     items    = db.relationship('InvoiceItem', backref='invoice', lazy=True, cascade='all, delete-orphan')
     payments = db.relationship('Payment',     backref='invoice', lazy=True, cascade='all, delete-orphan')
@@ -118,7 +119,7 @@ class Invoicecart(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    delivery_item_id = db.Column(db.Integer, db.ForeignKey('delivery_item.id'), nullable=True)
+    delivery_item_id = db.Column(db.Integer, db.ForeignKey('delivery_item.id'), nullable=False)
 
     quantity = db.Column(db.Numeric(10, 2), nullable=False)
     price_sell = db.Column(db.Numeric(10, 2), nullable=False)

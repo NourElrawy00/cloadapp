@@ -28,7 +28,7 @@ class WarehouseItem(BaseModel):
 
     stock = db.Column(db.Numeric(10, 2), nullable=False)
     min_stock = db.Column(db.Numeric(10, 2), nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price_buy = db.Column(db.Numeric(10, 2), nullable=False)
 
     movements = db.relationship('StockMovement', backref='warehouse_item', lazy=True, cascade='all, delete-orphan')
 
@@ -40,7 +40,6 @@ class StockMovement(BaseModel):
  
     quantity    = db.Column(db.Numeric(10, 2), nullable=False)
     unit_price  = db.Column(db.Numeric(10, 4), nullable=False)
-    total_price = db.Column(db.Numeric(12, 2), nullable=False)
 
     movement_type = db.Column(db.Enum(MovementType), nullable=False)
 
